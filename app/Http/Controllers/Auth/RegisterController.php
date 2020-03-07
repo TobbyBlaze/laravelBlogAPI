@@ -49,20 +49,21 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'name' => ['required', 'string', 'max:255'],
-            //'title' => ['string', 'max:255'],
-            //'first_name' => ['required', 'string', 'max:255'],
-            //'last_name' => ['required', 'string', 'max:255'],
-            //'status' => ['string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'name' => ['required', 'string', 'max:20', 'min:2'],
+            // 'title' => ['string', 'max:4'],
+            // 'first_name' => ['required', 'string', 'max:20', 'min:2'],
+            // 'last_name' => ['required', 'string', 'max:20', 'min:2'],
+            // 'status' => ['string', 'max:20'],
+            'reg_no' => ['required', 'string', 'max:14', 'max:14', 'unique:users'],
+            // 'bio' => ['string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:40', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            //'phone_number_1' => ['required', 'string', 'max:255'],
-            //'phone_number_2' => ['string', 'max:255'],
-            //'date_of_birth' => ['date', 'max:255'],
-            //'department' => ['string', 'max:255'],
-            //'faculty' => ['string', 'max:255'],
-            //'college' => ['string', 'max:255'],
-            //'status' => ['required', 'string', 'max:8'],
+            // 'phone_number_1' => ['required', 'string', 'max:20'],
+            // 'phone_number_2' => ['string', 'max:20'],
+            // 'date_of_birth' => ['date', 'max:10', 'max:10'],
+            // 'department' => ['string', 'max:100'],
+            // 'school' => ['string', 'max:100'],
+            // 'college' => ['string', 'max:100'],
         ]);
     }
 
@@ -75,18 +76,21 @@ class RegisterController extends Controller
     protected function create(array $data)
     {
         return User::create([
+            'id' => $data['id'],
             'name' => $data['name'],
             'title' => $data['title'],
             'first_name' => $data['first_name'],
             'last_name' => $data['last_name'],
             'status' => $data['status'],
+            'reg_no' => $data['reg_no'],
+            // 'bio' => $data['bio'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'phone_number_1' => $data['phone_number_1'],
             'phone_number_2' => $data['phone_number_2'],
             'date_of_birth' => $data['date_of_birth'],
             'department' => $data['department'],
-            'faculty' => $data['faculty'],
+            'school' => $data['school'],
             'college' => $data['college'],
         ]);
     }

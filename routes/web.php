@@ -17,67 +17,44 @@ use Illuminate\Support\Facades\Input;
 |
 */
 
-/*
-Route::get('/', function () {
-    return view('welcome');
-});
-*/
+Route::get('/about', 'PagesController@about');
+Route::get('/home', 'PostsController@index')->name('home');
+Route::get('/', 'PostsController@index');
+//Route::get('/find', 'UserController@find');
+//Route::get('/notification', 'PagesController@notification');
 
-//Route::get('/', 'PagesController@index');
-//Route::get('/', 'PostsController');
-Route::get('about', 'PagesController@about');
-Route::get('/find', 'UserController@find');
-Route::get('/notification', 'PagesController@notification');
-//Route::get('/profile', 'PagesController@profile');
 
-//Route::resource('posts', 'PostsController');
-Route::resource('', 'PostsController');
-Route::resource('/show', 'PostsController');
 
 Auth::routes();
 
-//Route::get('/home', 'HomeController@index')->name('home');
-
 Route::group(['middleware' => ['auth']], function(){
     Route::get('/home', 'PostsController@index')->name('home');
-    Route::post('user/{user}', 'UserController@viewProfile');
+    Route::resource('', 'PostsController');
+    Route::resource('/show', 'PostsController');
+    Route::any('/store_comments', 'PostsController@store_comments');
+    Route::any('/post', 'PostsController@post');
+    // Route::resource('/store_comments', 'PostsController');
+    Route::resource('/user/show', 'PostsController');
+    // Route::any('/user/show/com', 'PostsController@store_comments');
+    Route::any ( '/found-users', 'FindController@user');
+    Route::any ( '/found-posts', 'FindController@post');
+    Route::any ( '/found-all', 'FindController@all');
+
+    Route::get('notification/{profileId}', 'UserController@notification');
+    Route::get('notification/{profileId}/read', 'UserController@notificationRead');
+
+    Route::get('/user/{profileId}/follow', ['as' => 'user.follow', 'uses' => 'UserController@followUser']);
+    Route::get('/user/{profileId}/unfollow', ['as' => 'user.unfollow', 'uses' => 'UserController@unfollowUser']);
+    Route::get('user/{profileId}', 'UserController@viewProfile');
+    Route::get('/user/{profileId}/show', 'UserController@show');
+    Route::get('/user/{profileId}/followers', 'UserController@followers');
+    Route::get('/user/{profileId}/followings', 'UserController@followings');
+    // Route::get('/user/{profileId}/edit', 'UserController@edit');
+
+    Route::get('user/{profileId}/edit',  ['as' => 'user.edit', 'uses' => 'UserController@edit']);
+    // Route::get('user/edit',  ['as' => 'user.edit', 'uses' => 'UserController@edit']);
+    Route::put('user/{user}/update',  ['as' => 'user.update', 'uses' => 'UserController@update']);
+
+    // Route::resource('user/{profileId}/edit',  ['as' => 'user.edit', 'uses' => 'UserController@edit']);
+    // Route::resource('user/{user}/update',  ['as' => 'user.update', 'uses' => 'UserController@update']);
 });
-
-Route::any ( '/found-users', 'FindController@user');
-Route::any ( '/found-posts', 'FindController@post');
-Route::any ( '/found-all', 'FindController@all');
-
-// Route::any ( '/found-users', function () {
-//     $q = Input::get ( 'q' );
-//     $user = User::where ( 'name', 'LIKE', '%' . $q . '%' )->orWhere ( 'email', 'LIKE', '%' . $q . '%' )->get ();
-//     if (count ( $user ) > 0)
-//         return view ( 'pages.found-users' )->withDetails ( $user )->withQuery ( $q );
-//     else
-//         return view ( 'pages.found-users' )->withMessage ( 'No Details found. Try to search again !' );
-// } );
-
-// Route::any ( '/found-posts', function () {
-//     $q = Input::get ( 'q' );
-//     $post = Post::where ( 'title', 'LIKE', '%' . $q . '%' )->orWhere ( 'body', 'LIKE', '%' . $q . '%' )->get ();
-//     if (count ( $post ) > 0)
-//         return view ( 'pages.found-posts' )->withDetails ( $post )->withQuery ( $q );
-//     else
-//         return view ( 'pages.found-posts' )->withMessage ( 'No Details found. Try to search again !' );
-// } );
-
-//$route->post('user/{profileId}/follow', 'UserController@followUser')->name('user.follow');
-//$route->post('/{profileId}/unfollow', 'UserController@unFollowUser')->name('user.unfollow');
-
-//route::post('user/{profileId}/follow', 'UserController@followUser')->name('user.follow');
-//route::post('/{profileId}/unfollow', 'UserController@unFollowUser')->name('user.unfollow');
-
-Route::get('/user/{profileId}/follow', ['as' => 'user.follow', 'uses' => 'UserController@followUser']);
-Route::get('/user/{profileId}/unfollow', ['as' => 'user.unfollow', 'uses' => 'UserController@unfollowUser']);
-Route::get('/user/{profileId}/show', 'UserController@show');
-Route::get('/user/{profileId}/edit', 'UserController@edit');
-
-Route::get('user/{profileId}',  ['as' => 'user.edit', 'uses' => 'UserController@edit']);
-Route::patch('user/{user}/update',  ['as' => 'user.update', 'uses' => 'UserController@update']);
-
-//Route::post('user/{profileId}/follow', 'UserController@followUser')->name('user.follow');
-//Route::post('/{profileId}/unfollow', 'UserController@unFollowUser')->name('user.unfollow');

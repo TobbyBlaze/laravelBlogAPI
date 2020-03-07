@@ -18,6 +18,9 @@ class CreatePostsTable extends Migration
             //$table->integer('user_id');
             $table->string('title')->nullable();
             $table->mediumText('body');
+            $table->bigInteger('views')->nullable();
+            $table->bigInteger('post_user_id')->nullable();
+            $table->string('post_user_name')->nullable();
             $table->timestamps();
         });
     }

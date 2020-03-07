@@ -1,4 +1,4 @@
-@extends('layouts.ap')
+@extends('layouts.te')
 
 @section('content')
 
@@ -9,22 +9,19 @@
           <li data-target="#carouselExampleIndicators1" data-slide-to="2"></li>
         </ol>
         <div class="carousel-inner" role="listbox">
-          <div class="carousel-item active"> <img class="d-block mx-auto" style="width:100%; height:200px" src="storage/files/screen1.png" alt="First slide">
+          <div class="carousel-item active"> <img class="d-block mx-auto" style="width:100%; height:200px" src="storage/files/one.jpg" alt="First slide">
             <div class="carousel-caption">
-              <h5>First slide Heading</h5>
-              <p>First slide Caption</p>
+              <h5>Neoconn</h5>
             </div>
           </div>
-          <div class="carousel-item"> <img class="d-block mx-auto" style="width:100%; height:200px" src="storage/files/screen2.png" alt="Second slide">
+          <div class="carousel-item"> <img class="d-block mx-auto" style="width:100%; height:200px" src="storage/files/two.jpg" alt="Second slide">
             <div class="carousel-caption">
-              <h5>Second slide Heading</h5>
-              <p>Second slide Caption</p>
+              <h5></h5>
             </div>
           </div>
-          <div class="carousel-item"> <img class="d-block mx-auto" style="width:100%; height:200px" src="storage/files/screen3.png" alt="Third slide">
+          <div class="carousel-item"> <img class="d-block mx-auto" style="width:100%; height:200px" src="storage/files/ucc_logo.png" alt="Third slide">
             <div class="carousel-caption">
-              <h5>Third slide Heading</h5>
-              <p>Third slide Caption</p>
+              <h5></h5>
             </div>
           </div>
         </div>
@@ -39,6 +36,12 @@
                     <form method="POST" action="{{ route('register') }}">
                         @csrf
                         
+                        <div class="form-group row" hidden>
+                            <div class="col-md-6">
+                                <input id="id" type="number" name="id" value="{{ mt_rand(100000, 999999) }}" >
+                            </div>
+                        </div>
+
                         <div class="form-group row">
                             <label for="name" class="col-md-4 col-form-label text-md-right" title="Click to enter your Username. This will display on your profile.">{{ __('UserName') }}</label>
 
@@ -104,7 +107,21 @@
                                     <option value="Student">Student</option>
                                     <option value="Lecturer">Lecturer</option>
                                     <option value="Teaching Assistant">Teaching Assistant</option>
-                                  </select>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="reg_no" class="col-md-4 col-form-label text-md-right" title="Click to enter your last name. This will display on your profile.">{{ __('Registration Number') }}</label>
+
+                            <div class="col-md-6">
+                                <input id="reg_no" type="text" class="form-control{{ $errors->has('re_no') ? ' is-invalid' : '' }}" name="reg_no" value="{{ old('reg_no') }}" required placeholder="Registration Number">
+
+                                @if ($errors->has('reg_no'))
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $errors->first('reg_no') }}</strong>
+                                    </span>
+                                @endif
                             </div>
                         </div>
 
@@ -112,7 +129,7 @@
                             <label for="email" class="col-md-4 col-form-label text-md-right" title="Click to enter your email.">{{ __('E-Mail Address') }}</label>
 
                             <div class="col-md-6">
-                                <input id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" value="{{ old('email') }}" required>
+                                <input id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" value="{{ old('email') }}@mail.com" required>
                                 {{--<a class="btn btn-primary" disabled>@stu.edu.gh</a>--}}
                                 @if ($errors->has('email'))
                                     <span class="invalid-feedback" role="alert">
@@ -183,10 +200,10 @@
                         </div>
 
                         <div class="form-group row">
-                            <label for="faculty" class="col-md-4 col-form-label text-md-right" title="Click to enter your faculty name. This will display on your profile.">{{ __('Faculty') }}</label>
+                            <label for="school" class="col-md-4 col-form-label text-md-right" title="Click to enter your school name. This will display on your profile.">{{ __('school') }}</label>
 
                             <div class="col-md-6">
-                                <input id="faculty" type="text" class="form-control" name="faculty" value="{{ old('faculty') }}" placeholder="Faculty">
+                                <input id="school" type="text" class="form-control" name="school" value="{{ old('school') }}" placeholder="school">
                             </div>
                         </div>
 
@@ -200,12 +217,18 @@
 
                         <div class="form-group row mb-0">
                             <div class="col-md-6 offset-md-4">
-                                <button type="submit" class="btn btn-primary" title="Click to register.">
+                                <button id="reg" name="reg" type="submit" class="btn btn-primary" title="Click to register.">
                                     {{ __('Register') }}
                                 </button>
                             </div>
                         </div>
                     </form>
+                    {!!$f = null!!}
+                    @if (!empty($_POST['reg']))
+                        {!!$f = auth()->user()->id!!}
+                        <a id="autofollow" href="{{route('user.follow', $f)}}" class="btn btn-primary" hidden>Follow</a>
+                    @endif
+                    {{-- <a id="autofollow" href="{{route('user.follow', $f)}}" class="btn btn-primary" hidden>Follow</a> --}}
         </div>
     </div>
 </div>

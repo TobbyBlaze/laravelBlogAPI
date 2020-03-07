@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Post;
 use App\User;
+use App\Comment;
+use App\Notifications\newComment;
+use App\Notifications\newPost;
 use Auth;
 use DB;
 //use App\Http\Controllers\Auth;
@@ -17,10 +20,10 @@ class PostsController extends Controller
      *
      * @return void
      */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('auth', ['except' => ['about']]);
+    // }
 
     /**
      * Display a listing of the resource.
@@ -29,23 +32,25 @@ class PostsController extends Controller
      */
     public function index()
     {
+        
         $user = User::find(auth::user()->id);
+        $users = User::where('users.status', '!=', auth()->user()->status)->orderBy('users.created_at', 'desc')->paginate(10);
 
-        $users = User::all();
+        $posts = Post::orderBy('posts.updated_at', 'desc')->paginate(20);
 
-        $followers = $user->followers;
-        $followings = $user->followings;
+        $comments = Comment::orderBy('comments.updated_at', 'desc')
+        ->paginate(20);
 
-        // $ufollowers = $users->followers;
-        // $ufollowings = $users->followings;
+        $data = [
 
-        //$posts = Post::orderBy('posts.updated_at', 'desc')->paginate(20);
-        $posts = Post::orderBy('posts.updated_at', 'desc')->join('followers', 'followers.leader_id', '=', 'posts.user_id')->where('followers.follower_id', $user->id)/*->where('followers.follower_id', 'posts.user_id')*/->paginate(20);
-        //$posts = DB::select('SELECT * FROM posts ORDER BY DESC');
-        //return view('posts.index')->with('posts', $posts);
-        return view('posts.index', compact('user', 'users', 'followers' , 'followings', 'posts'), ['user' => $user])->with('posts', $posts)->with('user', $user);
-        //return response()->json($posts);
-        //return response()->json($users);
+            'user' => $user,
+            'users' => $users,
+            'posts'=>$posts,
+            'comments' => $comments,
+
+        ];
+
+        return response()->json($data,200);
     }
 
     /**
@@ -55,7 +60,7 @@ class PostsController extends Controller
      */
     public function create()
     {
-        return view('posts.create');
+        //
     }
 
     /**
@@ -66,6 +71,60 @@ class PostsController extends Controller
      */
     public function store(Request $request)
     {
+        $this->validate($request, ['body' => 'required']);
+
+        if($request->hasFile('file')){
+            $filenameWithExt = $request->file('file')->getClientOriginalName();
+            $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+            $extension = $request->file('file')->getClientOriginalExtension();
+            $filenameToStore = $filename.'_'.time().'.'.$extension;
+            //$path = $request->file('file')->storeAs('public/files/documents', $filenameToStore);
+            
+            if($extension == "jpg" || $extension == "jpeg" || $extension == "png" || $extension == "gif"){
+                $path = $request->file('file')->storeAs('public/files/images', $filenameToStore);
+            }elseif ($extension == "doc" || $extension == "docx" || $extension == "pdf" || $extension == "pptx" || $extension == "tex" || $extension == "txt") {
+                $path = $request->file('file')->storeAs('public/files/documents', $filenameToStore);
+            }
+
+            //create post
+
+            $post = new Post;
+            $post->title = $request->input('title');
+            $post->body = $request->input('body');
+            $post->user_id = auth()->user()->id;
+           
+            if($extension == "jpg" || $extension == "jpeg" || $extension == "png" || $extension == "gif"){
+                $post->image = $filenameToStore;
+            }elseif ($extension == "doc" || $extension == "docx" || $extension == "pdf" || $extension == "pptx" || $extension == "tex" || $extension == "txt") {
+                $post->file = $filenameToStore;
+            }
+            
+            $post->save();
+
+            return response()->json($post, 201);
+            
+        }else{
+            $filenameToStore = 'NoFile';
+
+            //create post
+
+            $post = new Post;
+            $post->title = $request->input('title');
+            $post->body = $request->input('body');
+            $post->user_id = auth()->user()->id;
+           
+            $post->save();
+
+            return response()->json($post, 201);
+        }
+
+    }
+
+    public function post(Request $request)
+    {
+
+        // $user = User::find($profileId);
+
         $this->validate($request, ['body' => 'required']);
         //return 123; 'image' => , 'file' => 'nullable|max:6000'
 
@@ -78,11 +137,7 @@ class PostsController extends Controller
             
             if($extension == "jpg" || $extension == "jpeg" || $extension == "png" || $extension == "gif"){
                 $path = $request->file('file')->storeAs('public/files/images', $filenameToStore);
-            //}elseif($extension == "mp4" || $extension == "flv" || $extension == "avi" || $extension == "3gp" || $extension == "evo"){
-            //    $path = $request->file('file')->storeAs('public/files/videos', $filenameToStore);
-            //}elseif($extension == "aac" || $extension == "mp3" || $extension == "ogg" || $extension == "wma"){
-            //    $path = $request->file('file')->storeAs('public/files/audios', $filenameToStore);
-            }else{
+            }elseif ($extension == "doc" || $extension == "docx" || $extension == "pdf" || $extension == "pptx" || $extension == "tex" || $extension == "txt") {
                 $path = $request->file('file')->storeAs('public/files/documents', $filenameToStore);
             }
 
@@ -92,23 +147,17 @@ class PostsController extends Controller
             $post->title = $request->input('title');
             $post->body = $request->input('body');
             $post->user_id = auth()->user()->id;
-            //$post->document = $filenameToStore;
-
-            //$extension = $request->file('file')->getClientOriginalExtension();
-            
+            $post->post_user_id = $request->input('user_id');
+           
             if($extension == "jpg" || $extension == "jpeg" || $extension == "png" || $extension == "gif"){
                 $post->image = $filenameToStore;
-            //}elseif($extension == "mp4" || $extension == "flv" || $extension == "avi" || $extension == "3gp" || $extension == "evo"){
-            //    $post->video = $filenameToStore;
-            //}elseif($extension == "aac" || $extension == "mp3" || $extension == "ogg" || $extension == "wma"){
-            //    $post->audio = $filenameToStore;
-            }else{
+            }elseif ($extension == "doc" || $extension == "docx" || $extension == "pdf" || $extension == "pptx" || $extension == "tex" || $extension == "txt") {
                 $post->file = $filenameToStore;
             }
             
             $post->save();
 
-            return redirect('/')->with('success', 'Post created successfully');
+            return response()->json($post, 201);
             
             
         }else{
@@ -120,12 +169,32 @@ class PostsController extends Controller
             $post->title = $request->input('title');
             $post->body = $request->input('body');
             $post->user_id = auth()->user()->id;
-            //$post->document = $filenameToStore;
-            
+            $post->post_user_id = $request->input('user_id');
+
             $post->save();
 
-            return redirect('/')->with('success', 'Post created successfully');
+            User::find($post->user_id)->notify(new newPost);
+            return response()->json($post, 201);
         }
+
+    }
+
+    public function store_comments(Request $request)
+    {
+
+        $this->validate($request, ['body' => 'required']);
+
+            $comment = new Comment;
+            $comment->body = $request->input('body');
+            $comment->post_id = $request->input('post_id');
+            $comment->post_user_id = $request->input('user_id');
+            $comment->user_id = auth()->user()->id;
+            
+            $comment->save();
+
+            User::find($comment->post_user_id)->notify(new newComment);
+
+            return response()->json($comment, 201);
 
     }
 
@@ -137,13 +206,38 @@ class PostsController extends Controller
      */
     public function show($id)
     {
+
         $post = Post::find($id);
 
-        $user = User::find($userId);
-        $followers = $user->followers;
-        $followings = $user->followings;
+        $user = User::find($id);
 
-        return view('posts.show', compact('user', 'followers' , 'followings', 'posts'))->with('post', $post);
+        $users = User::where('users.status', '!=', auth()->user()->status)->orderBy('users.created_at', 'desc')->paginate(10);
+
+        
+        $posts = Post::all();
+
+        Post::where('id', '=', $id)
+        ->update([
+            // Increment the view counter field
+            'views' => 
+            $post->views + 1        ,
+            // Prevent the updated_at column from being refreshed every time there is a new view
+            'updated_at' => \DB::raw('updated_at')   
+        ]);
+
+        $comments = Comment::orderBy('comments.updated_at', 'desc')
+        ->paginate(20);
+
+        $post_data = [
+            'post' => '$post',
+            'posts' => '$posts',
+            'user' => '$user',
+            'users' => '$users',
+            'comments' => '$comments',
+        ];
+
+        return response()->json($post_data);
+
     }
 
     /**
@@ -156,11 +250,23 @@ class PostsController extends Controller
     {
         $post = Post::find($id);
 
+        $user = User::find($id);
+
+        $users = User::where('users.status', '!=', auth()->user()->status)->orderBy('users.created_at', 'desc')->paginate(10);
+
+        $posts = Post::orderBy('posts.updated_at', 'desc');
+       
         if(auth()->user()->id !== $post->user_id){
-            return redirect('/')->with('error', 'Unauthorised page');
+            return response()->json($error, 401);
         }
 
-        return view('posts.edit')->with('post', $post);
+        $edit_data = [
+            'post' => '$post',
+            'user' => 'user',
+            'posts' => '$posts',
+        ];
+
+        return response()->json($edit_data, 201);
     }
 
     
@@ -174,8 +280,10 @@ class PostsController extends Controller
      */
     public function update(Request $request, $id)
     {
+
+        $post = Post::find($id);
+
         $this->validate($request, ['body' => 'required']);
-        //return 123;
 
         if($request->hasFile('file')){
             $filenameWithExt = $request->file('file')->getClientOriginalName();
@@ -186,53 +294,41 @@ class PostsController extends Controller
             
             if($extension == "jpg" || $extension == "jpeg" || $extension == "png" || $extension == "gif"){
                 $path = $request->file('file')->storeAs('public/files/images', $filenameToStore);
-            //}elseif($extension == "mp4" || $extension == "flv" || $extension == "avi" || $extension == "3gp" || $extension == "evo"){
-            //    $path = $request->file('file')->storeAs('public/files/videos', $filenameToStore);
-            //}elseif($extension == "aac" || $extension == "mp3" || $extension == "ogg" || $extension == "wma"){
-            //    $path = $request->file('file')->storeAs('public/files/audios', $filenameToStore);
-            }else{
+            }elseif ($extension == "doc" || $extension == "docx" || $extension == "pdf" || $extension == "zip" || $extension == "rar" || $extension == "pptx" || $extension == "tex" || $extension == "txt") {
                 $path = $request->file('file')->storeAs('public/files/documents', $filenameToStore);
             }
 
-            //create post
+            //update post
 
             $post = Post::find($id);
             $post->title = $request->input('title');
             $post->body = $request->input('body');
             $post->user_id = auth()->user()->id;
-            //$post->document = $filenameToStore;
-
-            //$extension = $request->file('file')->getClientOriginalExtension();
             
             if($extension == "jpg" || $extension == "jpeg" || $extension == "png" || $extension == "gif"){
                 $post->image = $filenameToStore;
-            //}elseif($extension == "mp4" || $extension == "flv" || $extension == "avi" || $extension == "3gp" || $extension == "evo"){
-            //    $post->video = $filenameToStore;
-            //}elseif($extension == "aac" || $extension == "mp3" || $extension == "ogg" || $extension == "wma"){
-            //    $post->audio = $filenameToStore;
-            }else{
+            }elseif ($extension == "doc" || $extension == "docx" || $extension == "pdf" || $extension == "zip" || $extension == "rar" || $extension == "pptx" || $extension == "tex" || $extension == "txt") {
                 $post->file = $filenameToStore;
             }
             
             $post->save();
 
-            return redirect('/')->with('success', 'Post created successfully');
+            return response()->json($post, 201);
             
             
         }else{
             $filenameToStore = 'NoFile';
 
-            //create post
+            //update post
 
             $post = Post::find($id);
             $post->title = $request->input('title');
             $post->body = $request->input('body');
             $post->user_id = auth()->user()->id;
-            //$post->document = $filenameToStore;
-            
+
             $post->save();
 
-            return redirect('/')->with('success', 'Post updated successfully');
+            return response()->json($post, 201);
         }
 
     }
@@ -251,24 +347,10 @@ class PostsController extends Controller
             return redirect('/')->with('error', 'Unauthorised page');
         }
 
-        /*
-        if($post->file != 'noimage.jpg'){
-            Storage::delete('public/files/'.$post->file);
-        }
-
-        if($post->file){
-            Storage::delete('public/files/documents/'.$post->file);
-        }
-
-        if($post->image){
-            Storage::delete('public/files/images/'.$post->image);
-        }
-        */
-
         Storage::delete('public/files/documents/'.$post->file);
         Storage::delete('public/files/images/'.$post->image);
         $post->delete();
 
-        return redirect('/')->with('success', 'Post deleted successfully');
+        return response()->json($post, 201);
     }
 }

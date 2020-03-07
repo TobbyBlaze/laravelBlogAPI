@@ -1,34 +1,32 @@
-@extends('layouts.ap')
+@extends('layouts.te')
 
 @section('content')
 
-<div id="carouselExampleIndicators1" class="carousel slide" data-ride="carousel" style="background-color: grey">
+<div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel" style="background-color: grey">
         <ol class="carousel-indicators">
-          <li data-target="#carouselExampleIndicators1" data-slide-to="0" class="active"></li>
-          <li data-target="#carouselExampleIndicators1" data-slide-to="1"></li>
-          <li data-target="#carouselExampleIndicators1" data-slide-to="2"></li>
+          <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+          <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+          <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
         </ol>
-        <div class="carousel-inner" role="listbox">
-          <div class="carousel-item active"> <img style="width:100%; height:200px" class="d-block mx-auto" src="storage/files/screen1.png" alt="First slide">
+        <div class="carousel-inner">
+          <div class="carousel-item active"> <img style="width:100%; height:200px" class="d-block mx-auto" src="storage/files/one.jpg" alt="First slide">
             <div class="carousel-caption">
-              <h5>First slide Heading</h5>
-              <p>First slide Caption</p>
+              <h5>Neoconn</h5>
             </div>
           </div>
-          <div class="carousel-item"> <img style="width:100%; height:200px" class="d-block mx-auto" src="storage/files/screen2.png" alt="Second slide">
+          <div class="carousel-item"> <img style="width:100%; height:200px" class="d-block mx-auto" src="storage/files/two.jpg" alt="Second slide">
             <div class="carousel-caption">
-              <h5>Second slide Heading</h5>
-              <p>Second slide Caption</p>
+              <h5></h5>
             </div>
           </div>
-          <div class="carousel-item"> <img style="width:100%; height:200px" class="d-block mx-auto" src="storage/files/screen3.png" alt="Third slide">
+          <div class="carousel-item"> <img style="width:100%; height:200px" class="d-block mx-auto" src="storage/files/ucc_logo.png" alt="Third slide">
             <div class="carousel-caption">
-              <h5>Third slide Heading</h5>
-              <p>Third slide Caption</p>
+              <h5></h5>
             </div>
           </div>
         </div>
-        <a class="carousel-control-prev" href="#carouselExampleIndicators1" role="button" data-slide="prev"> <span class="carousel-control-prev-icon" aria-hidden="true"></span> <span class="sr-only">Previous</span> </a> <a class="carousel-control-next" href="#carouselExampleIndicators1" role="button" data-slide="next"> <span class="carousel-control-next-icon" aria-hidden="true"></span> <span class="sr-only">Next</span> </a>
+        <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev"> <span class="carousel-control-prev-icon" aria-hidden="true"></span> <span class="sr-only">Previous</span> </a> 
+        <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next"> <span class="carousel-control-next-icon" aria-hidden="true"></span> <span class="sr-only">Next</span> </a>
 </div>
 
 <div class="container-fluid">

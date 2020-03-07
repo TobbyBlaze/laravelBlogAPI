@@ -2,13 +2,14 @@
 
 namespace App;
 
+use Laravel\Passport\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    use Notifiable;
+    use HasApiTokens, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -16,7 +17,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'title', 'first_name', 'last_name', 'status', 'email', 'password', 'phone_number_1', 'phone_number_2', 'date_of_birth', 'department', 'faculty', 'college',
+        'id', 'name', 'title', 'first_name', 'last_name', 'status','reg_no', 'email', 'password', 'phone_number_1', 'phone_number_2', 'date_of_birth', 'department', 'school', 'college',
     ];
 
     /**
@@ -38,13 +39,24 @@ class User extends Authenticatable
     ];
 
     public function posts(){
-        $this->hasMany('App\Posts');
+        return $this->hasMany('App\Post');
     }
 
+    public function comments(){
+        return $this->hasMany('App\Comment'); //not Comments
+    }
+
+    public function follows(){
+        return $this->hasMany('App\Follow');
+    }
+
+    // follow and unfollow
     public function followers()
     {
         return $this->belongsToMany(User::class, 'followers', 'leader_id', 'follower_id')->withTimestamps();
     }
+
+    
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
